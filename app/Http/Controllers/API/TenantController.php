@@ -25,19 +25,21 @@ class TenantController extends BaseController
     public function store(Request $request)
     {
         $request->validate([
-            'name'      => 'required|string|max:255',
-            'email'     => 'required|email|max:255',
-            'domain'    => 'required|string|unique:tenants,domain',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|max:255|unique:tenants,email',
+            'password'      => 'required|string',
+            'subdomain'     => 'required|string|unique:tenants,subdomain',
         ]);
 
         $tenant = Tenant::create([
-            'name'  => $request->name,
-            'email' => $request->email,
-            'domain' => $request->domain,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => bcrypt($request->password),
+            'subdomain' => $request->subdomain,
         ]);
 
         $tenant->domains()->create([
-            'domain' => $request->domain . '.' . config('app.domain')
+            'domain' => $request->subdomain . '.' . config('app.domain')
         ]);
 
         return $this->sendResponse($tenant, 'Tenant created successfully.');
@@ -60,18 +62,20 @@ class TenantController extends BaseController
     {
         $request->validate([
             'name'      => 'required|string|max:255',
-            'email'     => 'required|email|max:255',
-            'domain'    => 'required|string|unique:tenants,domain,' . $tenant->id,
+            'email'     => 'required|email|max:255|unique:tenants,email,' . $tenant->id,
+            'password'  => 'required|string',
+            'subdomain' => 'required|string|unique:tenants,subdomain,' . $tenant->id,
         ]);
 
         $tenant->update([
-            'name'  => $request->name,
-            'email' => $request->email,
-            'domain' => $request->domain,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => bcrypt($request->password),
+            'subdomain' => $request->subdomain,
         ]);
 
         $tenant->domains()->update([
-            'domain' => $request->domain . '.' . config('app.domain')
+            'domain' => $request->subdomain . '.' . config('app.domain')
         ]);
 
         return $this->sendResponse($tenant, 'Tenant updated successfully.');
