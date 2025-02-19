@@ -122,9 +122,18 @@ class TenancyServiceProvider extends ServiceProvider
     protected function mapRoutes()
     {
         $this->app->booted(function () {
+            // Tenant web routes
             if (file_exists(base_path('routes/tenant.php'))) {
                 Route::namespace(static::$controllerNamespace)
                     ->group(base_path('routes/tenant.php'));
+            }
+
+            // Tenant API routes
+            if (file_exists(base_path('routes/tenantApi.php'))) {
+                Route::namespace(static::$controllerNamespace)
+                    ->middleware('api')
+                    ->prefix('api')
+                    ->group(base_path('routes/tenantApi.php'));
             }
         });
     }
